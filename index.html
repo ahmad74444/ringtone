@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صانع نغمات الآيفون</title>
+    <style>
+        :root {
+            --primary-color: #007AFF;
+            --primary-hover: #0056b3;
+            --success-color: #34C759;
+            --error-color: #FF3B30;
+            --background: #f5f5f7;
+            --card-bg: #ffffff;
+            --text-color: #1d1d1f;
+            --border-color: #d2d2d7;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: #1d1d1f;
+                --card-bg: #2c2c2e;
+                --text-color: #f5f5f7;
+                --border-color: #3a3a3c;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 16px;
+            z-index: 100;
+            text-decoration: none;
+            border-radius: 0 0 0 8px;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+        main {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-color);
+        }
+
+        .file-input:focus {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+            border-color: var(--primary-color);
+        }
+
+        .file-input:hover {
+            border-color: var(--primary-color);
+        }
+
+        .file-name {
+            margin-top: 8px;
+            padding: 12px;
+            background: var(--background);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .file-name.visible {
+            display: block;
+        }
+
+        .duration-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .duration-field {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .duration-field input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .duration-field input:focus {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-hover);
+        }
+
+        .btn-primary:focus {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .btn-success.visible {
+            display: block;
+        }
+
+        .progress-container {
+            margin-top: 24px;
+            display: none;
+        }
+
+        .progress-container.visible {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .status-message {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .status-message.visible {
+            display: block;
+        }
+
+        .status-message.success {
+            background: rgba(52, 199, 89, 0.15);
+            color: var(--success-color);
+        }
+
+        .status-message.error {
+            background: rgba(255, 59, 48, 0.15);
+            color: var(--error-color);
+        }
+
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 16px;
+        }
+
+        .instructions h2 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+        }
+
+        .instructions ol {
+            padding-right: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* تحسينات إضافية للوصولية */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+            }
+        }
+
+        /* تكبير النص للشاشات الصغيرة */
+        @media (max-width: 480px) {
+            body {
+                font-size: 18px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* التركيز المرئي المحسن */
+        *:focus-visible {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* منطقة السحب والإفلات */
+        .drop-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--primary-color);
+            background: rgba(0, 122, 255, 0.1);
+        }
+
+        .drop-zone-text {
+            pointer-events: none;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">انتقل إلى المحتوى الرئيسي</a>
+
+    <main id="main-content" role="main">
+        <header>
+            <h1>صانع نغمات الآيفون</h1>
+            <p class="description">قص أول 30 ثانية من أي ملف صوتي أو فيديو وحوّله إلى نغمة</p>
+        </header>
+
+        <div class="card">
+            <form id="ringtone-form" aria-labelledby="form-heading">
+                <h2 id="form-heading" class="visually-hidden">نموذج إنشاء النغمة</h2>
+
+                <div class="form-group">
+                    <label for="file-input">اختر ملف صوتي أو فيديو</label>
+                    <div class="drop-zone" id="drop-zone" role="button" tabindex="0" aria-describedby="drop-zone-desc">
+                        <input
+                            type="file"
+                            id="file-input"
+                            class="file-input"
+                            accept="audio/*,video/*"
+                            aria-required="true"
+                        >
+                        <p class="drop-zone-text">اضغط لاختيار ملف أو اسحب الملف وأفلته هنا</p>
+                        <p id="drop-zone-desc" class="visually-hidden">يمكنك سحب وإفلات الملف هنا أو الضغط لفتح مستعرض الملفات</p>
+                    </div>
+                    <div class="file-name" id="file-name" aria-live="polite"></div>
+                </div>
+
+                <div class="form-group">
+                    <fieldset>
+                        <legend>مدة القص (بالثواني)</legend>
+                        <div class="duration-group">
+                            <div class="duration-field">
+                                <label for="start-time">البداية</label>
+                                <input
+                                    type="number"
+                                    id="start-time"
+                                    value="0"
+                                    min="0"
+                                    step="0.1"
+                                    aria-describedby="start-time-desc"
+                                >
+                                <span id="start-time-desc" class="visually-hidden">وقت بداية القص بالثواني</span>
+                            </div>
+                            <div class="duration-field">
+                                <label for="duration">المدة</label>
+                                <input
+                                    type="number"
+                                    id="duration"
+                                    value="30"
+                                    min="1"
+                                    max="40"
+                                    step="0.1"
+                                    aria-describedby="duration-desc"
+                                >
+                                <span id="duration-desc" class="visually-hidden">مدة النغمة بالثواني، الحد الأقصى 40 ثانية</span>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="convert-btn" disabled>
+                    إنشاء النغمة
+                </button>
+            </form>
+
+            <div class="progress-container" id="progress-container" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="تقدم التحويل">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <p class="progress-text" id="progress-text" aria-live="polite">جارٍ التحويل...</p>
+            </div>
+
+            <div class="status-message" id="status-message" role="alert" aria-live="assertive"></div>
+
+            <button class="btn btn-success" id="download-btn" aria-describedby="download-desc">
+                تحميل النغمة
+            </button>
+            <span id="download-desc" class="visually-hidden">اضغط لتحميل ملف النغمة بصيغة WAV</span>
+        </div>
+
+        <section class="instructions" aria-labelledby="instructions-heading">
+            <h2 id="instructions-heading">كيفية استخدام النغمة على الآيفون</h2>
+            <ol>
+                <li>حمّل الملف الصوتي بصيغة WAV</li>
+                <li>انقل الملف إلى الآيفون عبر iTunes أو Finder</li>
+                <li>استخدم تطبيق GarageBand لتحويله إلى نغمة</li>
+                <li>اذهب إلى الإعدادات ثم الأصوات واختر النغمة الجديدة</li>
+            </ol>
+        </section>
+
+        <footer>
+            <p>صُمم بحب لمستخدمي الآيفون</p>
+        </footer>
+    </main>
+
+    <script>
+        // عناصر الصفحة
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
+        const fileName = document.getElementById('file-name');
+        const startTimeInput = document.getElementById('start-time');
+        const durationInput = document.getElementById('duration');
+        const convertBtn = document.getElementById('convert-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const progressContainer = document.getElementById('progress-container');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        const statusMessage = document.getElementById('status-message');
+        const form = document.getElementById('ringtone-form');
+
+        let audioContext;
+        let audioBuffer;
+        let wavBlob;
+
+        // تهيئة AudioContext
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext;
+        }
+
+        // أحداث السحب والإفلات
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect(files[0]);
+            }
+        });
+
+        // دعم لوحة المفاتيح لمنطقة السحب
+        dropZone.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                fileInput.click();
+            }
+        });
+
+        // معالجة اختيار الملف
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        async function handleFileSelect(file) {
+            fileName.textContent = `الملف المحدد: ${file.name}`;
+            fileName.classList.add('visible');
+            convertBtn.disabled = false;
+
+            // تحميل الملف وتحليله
+            try {
+                updateStatus('جارٍ تحميل الملف...', 'info');
+                const arrayBuffer = await file.arrayBuffer();
+                initAudioContext();
+
+                updateProgress(20, 'جارٍ تحليل الملف الصوتي...');
+                audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+                const fileDuration = audioBuffer.duration;
+                updateStatus(`تم تحميل الملف بنجاح. المدة: ${fileDuration.toFixed(1)} ثانية`, 'success');
+                hideProgress();
+            } catch (error) {
+                updateStatus('حدث خطأ أثناء تحميل الملف. تأكد من أن الملف صوتي صالح.', 'error');
+                convertBtn.disabled = true;
+                console.error('Error loading file:', error);
+            }
+        }
+
+        // معالجة النموذج
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!audioBuffer) {
+                updateStatus('الرجاء اختيار ملف صوتي أولاً', 'error');
+                return;
+            }
+
+            const startTime = parseFloat(startTimeInput.value) || 0;
+            const duration = parseFloat(durationInput.value) || 30;
+
+            if (startTime >= audioBuffer.duration) {
+                updateStatus('وقت البداية أكبر من مدة الملف', 'error');
+                return;
+            }
+
+            try {
+                convertBtn.disabled = true;
+                showProgress();
+                updateProgress(30, 'جارٍ قص المقطع الصوتي...');
+
+                // قص المقطع
+                const trimmedBuffer = trimAudio(audioBuffer, startTime, duration);
+
+                updateProgress(60, 'جارٍ تحويل الملف إلى WAV...');
+
+                // تحويل إلى WAV
+                wavBlob = audioBufferToWav(trimmedBuffer);
+
+                updateProgress(100, 'تم الانتهاء!');
+
+                downloadBtn.classList.add('visible');
+                updateStatus('تم إنشاء النغمة بنجاح! اضغط على زر التحميل.', 'success');
+
+                // التركيز على زر التحميل للوصولية
+                setTimeout(() => {
+                    downloadBtn.focus();
+                }, 100);
+
+            } catch (error) {
+                updateStatus('حدث خطأ أثناء المعالجة: ' + error.message, 'error');
+                console.error('Processing error:', error);
+            } finally {
+                convertBtn.disabled = false;
+            }
+        });
+
+        // قص الصوت
+        function trimAudio(buffer, startTime, duration) {
+            const sampleRate = buffer.sampleRate;
+            const channels = buffer.numberOfChannels;
+
+            const startSample = Math.floor(startTime * sampleRate);
+            const endSample = Math.min(
+                Math.floor((startTime + duration) * sampleRate),
+                buffer.length
+            );
+            const trimmedLength = endSample - startSample;
+
+            const trimmedBuffer = audioContext.createBuffer(
+                channels,
+                trimmedLength,
+                sampleRate
+            );
+
+            for (let channel = 0; channel < channels; channel++) {
+                const originalData = buffer.getChannelData(channel);
+                const trimmedData = trimmedBuffer.getChannelData(channel);
+
+                for (let i = 0; i < trimmedLength; i++) {
+                    trimmedData[i] = originalData[startSample + i];
+                }
+            }
+
+            return trimmedBuffer;
+        }
+
+        // تحويل AudioBuffer إلى WAV
+        function audioBufferToWav(buffer) {
+            const numChannels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            const format = 1; // PCM
+            const bitDepth = 16;
+
+            const bytesPerSample = bitDepth / 8;
+            const blockAlign = numChannels * bytesPerSample;
+
+            const dataLength = buffer.length * blockAlign;
+            const bufferLength = 44 + dataLength;
+
+            const arrayBuffer = new ArrayBuffer(bufferLength);
+            const view = new DataView(arrayBuffer);
+
+            // كتابة رأس WAV
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + dataLength, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, format, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * blockAlign, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bitDepth, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, dataLength, true);
+
+            // كتابة البيانات الصوتية
+            const offset = 44;
+            const channels = [];
+            for (let i = 0; i < numChannels; i++) {
+                channels.push(buffer.getChannelData(i));
+            }
+
+            let index = offset;
+            for (let i = 0; i < buffer.length; i++) {
+                for (let channel = 0; channel < numChannels; channel++) {
+                    const sample = Math.max(-1, Math.min(1, channels[channel][i]));
+                    const intSample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                    view.setInt16(index, intSample, true);
+                    index += 2;
+                }
+            }
+
+            return new Blob([arrayBuffer], { type: 'audio/wav' });
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        // تحميل الملف
+        downloadBtn.addEventListener('click', () => {
+            if (wavBlob) {
+                const url = URL.createObjectURL(wavBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ringtone.wav';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                updateStatus('تم تحميل الملف بنجاح!', 'success');
+            }
+        });
+
+        // دوال مساعدة للتقدم والحالة
+        function showProgress() {
+            progressContainer.classList.add('visible');
+        }
+
+        function hideProgress() {
+            progressContainer.classList.remove('visible');
+        }
+
+        function updateProgress(percent, text) {
+            progressFill.style.width = percent + '%';
+            progressContainer.setAttribute('aria-valuenow', percent);
+            progressText.textContent = text;
+        }
+
+        function updateStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.classList.remove('success', 'error', 'info');
+            statusMessage.classList.add('visible', type);
+        }
+    </script>
+</body>
+</html>
